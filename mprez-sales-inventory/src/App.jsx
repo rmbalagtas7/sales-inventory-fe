@@ -8,9 +8,11 @@ import {
   BrowserRouter,
 } from "react-router-dom";
 import { ThemeProvider, createTheme, CssBaseline } from "@mui/material";
-
-import DashboardLayoutBasic from './components/Dashboard.jsx'
 import Auth from "./components/Auth.jsx";
+import Inventory from "./components/Inventory.jsx";
+import Dashboard from "./components/Dashboard.jsx";
+import Sales from "./components/Sales.jsx";
+
 const theme = createTheme({
   palette: {
     primary: {
@@ -40,8 +42,10 @@ function App() {
     <ThemeProvider theme={theme}>
       <Router>
         <Routes>
-          <Route path="/" element={<Auth />} />
-          <Route path="/dashboard" element={<DashboardLayoutBasic />} />
+          <Route path="/auth" element={<Auth />} />
+          <Route path="/dashboard" element={<Dashboard />} />
+          <Route path="/sales" element={<Sales />} />
+          <Route path="/inventory" element={<Inventory />} />
         </Routes>
       </Router>
     </ThemeProvider>

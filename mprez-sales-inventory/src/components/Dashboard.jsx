@@ -1,252 +1,149 @@
-import * as React from 'react';
-import PropTypes from 'prop-types';
-import Box from '@mui/material/Box';
-import Typography from '@mui/material/Typography';
-import { createTheme } from '@mui/material/styles';
-import DashboardIcon from '@mui/icons-material/Dashboard';
-import WarehouseIcon from '@mui/icons-material/Warehouse';
-import BarChartIcon from '@mui/icons-material/BarChart';
-import DescriptionIcon from '@mui/icons-material/Description';
-import LocalShippingIcon from '@mui/icons-material/LocalShipping';
-import ShoppingBagIcon from '@mui/icons-material/ShoppingBag';
-import PersonIcon from '@mui/icons-material/Person';
-import ReceiptIcon from '@mui/icons-material/Receipt';
-import LayersIcon from '@mui/icons-material/Layers';
-import { AppProvider } from '@toolpad/core/AppProvider';
-import { DashboardLayout } from '@toolpad/core/DashboardLayout';
-import { useDemoRouter } from '@toolpad/core/internal';
-import Logo from "../assets/logo.png";
-import { PageContainer } from '@toolpad/core/PageContainer';
-import Inventory from './Inventory';
-// Define the navigation items
+import * as React from "react";
+import { Box, Button, Typography, CssBaseline, Grid, Card, CardContent } from "@mui/material";
+import { DataGrid } from "@mui/x-data-grid";
+import AddIcon from "@mui/icons-material/Add";
+import CustomAppBar from "../layout/CustomAppbar";
+import Sidebar, { AdminMenu } from "../layout/Sidebar";
+import CustomBottomBar from "../layout/CustomBottombar";
+import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
+import { LocalizationProvider, DatePicker } from "@mui/x-date-pickers";
 
- // Import Link for routing
-
-const NAVIGATION = [
-  {
-    kind: 'header',
-    title: 'Main items',
-  },
-  {
-    segment: 'dashboard',
-    title: 'Dashboard',
-    icon: <DashboardIcon />,  
-  },
-  {
-    segment: 'sales',
-    title: 'Sales',
-    icon: <DescriptionIcon />,
-  },
-  {
-    segment: 'inventory',
-    title: 'Inventory',
-    icon: <WarehouseIcon />,
-
-    children: [
-      {
-        segment: 'bigrolls/buttrolls',
-        title: 'Bigrolls/Buttrolls',
-        icon: <DescriptionIcon />,
-
-      },
-      {
-        segment: 'delivery receipt',
-        title: 'Delivery Receipt',
-        icon: <DescriptionIcon />,
-      },
-      {
-        segment: 'acknowledgement receipt',
-        title: 'Acknowledgement Receipt',
-        icon: <DescriptionIcon />,
-      },
-    ], // Link for the Inventory page
-  },
-  {
-    segment: 'customers',
-    title: 'Customers',
-    icon: <PersonIcon />,
-  },
-  {
-    segment: 'suppliers',
-    title: 'Suppliers',
-    icon: <LocalShippingIcon />,
-  },
-  {
-    segment: 'purchases',
-    title: 'Purchase',
-    icon: <ShoppingBagIcon />,
-  },
-  {
-    kind: 'divider',
-  },
-  {
-    kind: 'header',
-    title: 'Invoice Monitoring',
-  },
-  {
-    segment: 'receipts',
-    title: 'Receipts',
-    icon: <ReceiptIcon />,
-    children: [
-      {
-        segment: 'sales invoice',
-        title: 'Sales Invoice',
-        icon: <DescriptionIcon />,
-      },
-      {
-        segment: 'delivery receipt',
-        title: 'Delivery Receipt',
-        icon: <DescriptionIcon />,
-      },
-      {
-        segment: 'acknowledgement receipt',
-        title: 'Acknowledgement Receipt',
-        icon: <DescriptionIcon />,
-      },
-    ],
-  },
-  /* {
-    segment: 'integrations',
-    title: 'Integrations',
-    icon: <LayersIcon />,
-    link: '/integrations', // Link for Integrations page
-  }, */
+// Mock Data
+const mockInventoryData = [
+  { id: 1, product: "Product 1", quantity: 50, price: 20.0 },
+  { id: 2, product: "Product 2", quantity: 200, price: 15.0 },
+  { id: 3, product: "Product 3", quantity: 100, price: 30.0 },
 ];
 
+const mockSalesData = [
+  { id: 1, product: "Product 1", quantity: 5, price: 20.0, total: 100.0 },
+  { id: 2, product: "Product 2", quantity: 3, price: 15.0, total: 45.0 },
+  { id: 3, product: "Product 3", quantity: 2, price: 30.0, total: 60.0 },
+];
 
-// Create a custom theme with breakpoints
-const demoTheme = createTheme({
-  cssVariables: {
-    colorSchemeSelector: 'data-toolpad-color-scheme',
-  },
-  colorSchemes: { light: true, dark: true },
-  breakpoints: {
-    values: {
-      xs: 0,
-      sm: 600,
-      md: 900,
-      lg: 1200,
-      xl: 1536,
-    },
-  },
-  palette: {
-    primary: {
-      main: '#3f9152', // Custom primary color (Blue)
-    },
-    secondary: {
-      main: '#ff4081', // Example secondary color (Pink)
-    },
-  },
-  typography: {
-    fontFamily: [
-      "Poppins",
-      "-apple-system",
-      "BlinkMacSystemFont",
-      '"Segoe UI"',
-      "Roboto",
-      '"Helvetica Neue"',
-      "Arial",
-      "sans-serif",
-      '"Apple Color Emoji"',
-      '"Segoe UI Emoji"',
-      '"Segoe UI Symbol"',
-    ].join(","),
-  }
-});
+// Metrics and Columns for the Dashboard
+const inventoryColumns = [
+  { field: "product", headerName: "Product", width: 180, headerAlign: "center" },
+  { field: "quantity", headerName: "Quantity", width: 180, headerAlign: "center" },
+  { field: "price", headerName: "Price", width: 180, headerAlign: "center" },
+];
 
-// Page content component
-function DemoPageContent({ pathname }) {
-  
-  if (pathname === '/inventory/bigrolls/buttrolls') {
-    return <Inventory />
-  }
+const salesColumns = [
+  { field: "product", headerName: "Product", width: 180, headerAlign: "center" },
+  { field: "quantity", headerName: "Quantity", width: 180, headerAlign: "center" },
+  { field: "price", headerName: "Price", width: 180, headerAlign: "center" },
+  { field: "total", headerName: "Total", width: 180, headerAlign: "center" },
+];
+
+export default function Dashboard() {
+  const [startDate, setStartDate] = React.useState(null);
+  const [endDate, setEndDate] = React.useState(null);
+
   return (
-    <Box
-      sx={{
-        py: 4,
-        display: 'flex',
-        flexDirection: 'column',
-        alignItems: 'center',
-        textAlign: 'center',
-        minHeight: '100vh', // Ensures full screen height
-      }}
-    >
-      <PageContainer>
-        {pathname}
-      </PageContainer>
+    <Box sx={{ display: "flex", flexDirection: "column", height: "100vh" }}>
+      <CssBaseline />
+      <CustomAppBar />
+      <Box sx={{ display: "flex", flexGrow: 1 }}>
+        <Sidebar />
+        <Box
+          component="main"
+          sx={{
+            flexGrow: 1,
+            p: 3,
+            display: "flex",
+            flexDirection: "column",
+            gap: 2,
+            maxWidth: { xs: "100%", md: "calc(100% - 300px)" },
+            overflowX: "auto",
+            marginTop: "4em",
+          }}
+        >
+          <Typography variant="h5" component="h2" gutterBottom>
+            Dashboard
+          </Typography>
+
+          {/* Overview Section */}
+          <Grid container spacing={2}>
+            {/* Total Earnings */}
+            <Grid item xs={12} sm={6} md={3}>
+              <Card>
+                <CardContent>
+                  <Typography variant="h6">Total Earnings</Typography>
+                  <Typography variant="h5">$500.00</Typography>
+                </CardContent>
+              </Card>
+            </Grid>
+
+            {/* Total Orders */}
+            <Grid item xs={12} sm={6} md={3}>
+              <Card>
+                <CardContent>
+                  <Typography variant="h6">Total Orders</Typography>
+                  <Typography variant="h5">$961</Typography>
+                </CardContent>
+              </Card>
+            </Grid>
+
+            {/* Total Income */}
+            <Grid item xs={12} sm={6} md={3}>
+              <Card>
+                <CardContent>
+                  <Typography variant="h6">Total Income</Typography>
+                  <Typography variant="h5">$203K</Typography>
+                </CardContent>
+              </Card>
+            </Grid>
+
+            {/* Growth Chart */}
+            <Grid item xs={12} sm={6} md={3}>
+              <Card>
+                <CardContent>
+                  <Typography variant="h6">Growth</Typography>
+                  <Typography variant="h5">$2,324.00</Typography>
+                  {/* Insert a growth chart component here */}
+                </CardContent>
+              </Card>
+            </Grid>
+          </Grid>
+
+          {/* Inventory Section */}
+          <Typography variant="h6" gutterBottom>
+            Inventory
+          </Typography>
+          <DataGrid
+            rows={mockInventoryData}
+            columns={inventoryColumns}
+            pageSize={5}
+            loading={false}
+            getRowId={(row) => row.id}
+            sx={{
+              height: 300,
+              "& .MuiDataGrid-cell": {
+                textAlign: "center",
+              },
+            }}
+          />
+
+          {/* Sales Section */}
+          <Typography variant="h6" gutterBottom>
+            Sales
+          </Typography>
+          <DataGrid
+            rows={mockSalesData}
+            columns={salesColumns}
+            pageSize={5}
+            loading={false}
+            getRowId={(row) => row.id}
+            sx={{
+              height: 300,
+              "& .MuiDataGrid-cell": {
+                textAlign: "center",
+              },
+            }}
+          />
+        </Box>
+      </Box>
+      <CustomBottomBar menu={AdminMenu} />
     </Box>
   );
 }
-
-DemoPageContent.propTypes = {
-  pathname: PropTypes.node.isRequired,
-};
-
-// Main layout component
-function DashboardLayoutBasic() {
-
-  
-  const [session, setSession] = React.useState({
-    user: {
-      name: 'Bharat Kashyap',
-      email: 'bharatkashyap@outlook.com',
-      image: 'https://avatars.githubusercontent.com/u/19550456',
-    },
-  });
-
-  const authentication = React.useMemo(() => {
-    return {
-      signIn: () => {
-        setSession({
-          user: {
-            name: 'Bharat Kashyap',
-            email: 'bharatkashyap@outlook.com',
-            image: 'https://avatars.githubusercontent.com/u/19550456',
-          },
-        });
-      },
-      signOut: () => {
-        setSession(null);
-      },
-    };
-  }, []);
-
-  const router = useDemoRouter('/dashboard');
-
-  return (
-    <AppProvider
-     session={session}
-     authentication={authentication}
-      navigation={NAVIGATION}
-      router={router}
-      theme={demoTheme}
-      branding={{
-        title: '',
-        logo: <img src={Logo} alt="MPrez Scrap Trading Logo" style={{ maxWidth: '100%', marginTop: '4px' }} /> 
-      }}
-    >
-      <Box
-        sx={{
-          display: 'flex',
-          flexDirection: 'row', // Horizontal layout on large screens
-          minHeight: '100vh', // Full viewport height
-          width: '100%', // Full width
-          overflow: 'hidden', // Prevent scrolling
-          [demoTheme.breakpoints.up('lg')]: {
-            flexDirection: 'row', // Keeps side-by-side on large screens
-          },
-          [demoTheme.breakpoints.down('md')]: {
-            flexDirection: 'column', // Stack vertically on medium and smaller screens
-          },
-        }}
-      >
-        {/* Sidebar and content section */}
-        <DashboardLayout>
-          <DemoPageContent pathname={router.pathname} />
-        </DashboardLayout>
-      </Box>
-    </AppProvider>
-  );
-}
-
-export default DashboardLayoutBasic;

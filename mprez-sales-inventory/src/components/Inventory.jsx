@@ -1,13 +1,14 @@
 import * as React from "react";
 import { DataGrid, GridToolbar } from "@mui/x-data-grid";
-import { Box, Button, Typography } from "@mui/material";
+import { Box, Button, Typography, CssBaseline } from "@mui/material";
 import EditIcon from "@mui/icons-material/Edit";
 import DeleteIcon from "@mui/icons-material/Delete";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import { LocalizationProvider, DatePicker } from "@mui/x-date-pickers";
-import AddIcon from "@mui/icons-material/Add"; 
-
-
+import AddIcon from "@mui/icons-material/Add";
+import CustomAppBar from "../layout/CustomAppbar";
+import Sidebar, { AdminMenu } from "../layout/Sidebar";
+import CustomBottomBar from "../layout/CustomBottombar";
 
 const mockData = [
   {
@@ -62,7 +63,7 @@ const mockData = [
     mpstWeight: 6650,
     paidWeight: 6650,
     pricePerKilo: 19.25,
-    amount: 128012.50,
+    amount: 128012.5,
   },
   {
     id: 7,
@@ -111,13 +112,32 @@ const mockData = [
   },
 ];
 
-
 const columns = [
   { field: "date", headerName: "Date", width: 180, headerAlign: "center" },
-  { field: "papermill", headerName: "Papermill", width: 250, headerAlign: "center" },
-  { field: "mpstWeight", headerName: "MPST Weight", width: 220, headerAlign: "center" },
-  { field: "paidWeight", headerName: "Paid Weight", width: 220, headerAlign: "center" },
-  { field: "pricePerKilo", headerName: "Price per Kilo", width: 220, headerAlign: "center" },
+  {
+    field: "papermill",
+    headerName: "Papermill",
+    width: 250,
+    headerAlign: "center",
+  },
+  {
+    field: "mpstWeight",
+    headerName: "MPST Weight",
+    width: 220,
+    headerAlign: "center",
+  },
+  {
+    field: "paidWeight",
+    headerName: "Paid Weight",
+    width: 220,
+    headerAlign: "center",
+  },
+  {
+    field: "pricePerKilo",
+    headerName: "Price per Kilo",
+    width: 220,
+    headerAlign: "center",
+  },
   { field: "amount", headerName: "Amount", width: 260, headerAlign: "center" },
   {
     field: "action",
@@ -204,52 +224,91 @@ export default function Inventory() {
   const rowsWithTotals = [...filteredRows, totalsRow];
 
   return (
-    <div style={{ height: 600, width: "95%", marginTop: "2em", marginLeft: "2.5em" }}>
-    <Typography variant="h5" component="h2">BIG ROLLS / BUTT ROLLS</Typography>
-      <LocalizationProvider dateAdapter={AdapterDayjs}>
-        <Box display="flex" alignItems="center" justifyContent="space-between" margin={2}>
-          <Box display="flex" gap={2}>
-            <DatePicker
-              label="Start Date"
-              value={startDate}
-              onChange={(newValue) => setStartDate(newValue)}
-              renderInput={(params) => <Box {...params} />}
-            />
-            <DatePicker
-              label="End Date"
-              value={endDate}
-              onChange={(newValue) => setEndDate(newValue)}
-              renderInput={(params) => <Box {...params} />}
-            />
-          </Box>
-          <Button
-            variant="contained"
-            color="primary"
-            onClick={() => alert("Apply filter")}
-            style={{ height: 56 }}
-            startIcon={<AddIcon />} 
-          >
-            Add Product
-          </Button>
-        </Box>
-      </LocalizationProvider>
+    <Box sx={{ display: "flex", flexDirection: "column", height: "100vh" }}>
+      <CssBaseline />
+      <CustomAppBar />
+      <Box sx={{ display: "flex", flexGrow: 1 }}>
+        <Sidebar />
+        <Box
+          component="main"
+          sx={{
+            flexGrow: 1,
+            p: 3,
+            display: "flex",
+            flexDirection: "column",
+            gap: 2,
+            maxWidth: { xs: "100%", md: "calc(100% - 300px)" }, // Adjust for smaller screens
+            overflowX: "auto",
+            marginTop: "4em",
+          }}
+        >
+          <Typography variant="h5" component="h2" gutterBottom>
+            BIG ROLLS / BUTT ROLLS
+          </Typography>
+          <LocalizationProvider dateAdapter={AdapterDayjs}>
+            <Box
+              display="flex"
+              flexDirection="row"
+              justifyContent="space-between"
+              gap={2}
+              alignItems="center"
+            >
+              <Box
+                display="flex"
+                flexDirection={{ xs: "column", sm: "row" }}
+                gap={2}
+              >
+                <DatePicker
+                  label="Start Date"
+                  value={startDate}
+                  onChange={(newValue) => setStartDate(newValue)}
+                  renderInput={(params) => <Box {...params} />}
+                  sx={{ width: { xs: "100%", sm: "auto" } }}
+                />
+                <DatePicker
+                  label="End Date"
+                  value={endDate}
+                  onChange={(newValue) => setEndDate(newValue)}
+                  renderInput={(params) => <Box {...params} />}
+                  sx={{ width: { xs: "100%", sm: "auto" } }}
+                />
+              </Box>
 
-      <DataGrid
-        rows={rowsWithTotals}
-        columns={columns}
-        pageSize={5}
-        loading={false}
-        slots={{ toolbar: GridToolbar }}
-        getRowId={(row) => row.id}
-        sx={{
-          "& .MuiDataGrid-cell": {
-            textAlign: "center",
-          },
-          "& .MuiDataGrid-footerCell": {
-            fontWeight: "bold",
-          },
-        }}
-      />
-    </div>
+              {/* Button aligned to the right */}
+              <Button
+                variant="contained"
+                color="primary"
+                onClick={() => alert("Apply filter")}
+                startIcon={<AddIcon />}
+                sx={{ width: { xs: "100%", sm: "auto" } }}
+              >
+                Add Product
+              </Button>
+            </Box>
+          </LocalizationProvider>
+
+          <DataGrid
+            rows={rowsWithTotals}
+            columns={columns}
+            pageSize={5}
+            loading={false}
+            slots={{ toolbar: GridToolbar }}
+            getRowId={(row) => row.id}
+            sx={{
+              "& .MuiDataGrid-cell": {
+                textAlign: "center",
+              },
+              "& .MuiDataGrid-footerCell": {
+                fontWeight: "bold",
+              },
+              "& .MuiDataGrid-columnHeaders": {
+                textAlign: "center",
+              },
+            }}
+          />
+        </Box>
+      </Box>
+      <CustomBottomBar menu={AdminMenu} />
+    </Box>
   );
 }
